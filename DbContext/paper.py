@@ -1,75 +1,80 @@
-from xmltodict import *
+import xmltodict
 import settings
+import tarfile
+from collections import OrderedDict
 
 
 class Paper:
 
     def __init__(self, id):
-        f = self._file_to_dict(self._file_id_to_location(id) + '.xml')
+        f = Paper._xml_file_to_dict(id)
         doc = f['document']
         self.id = doc['@id']
 
-        if keys_exist(doc, 'title', '#text'):
+        if Paper._keys_exist(doc, 'title', '#text'):
             self.title = doc['title']['#text']
 
-        if keys_exist(doc, 'abstract', '#text'):
+        if Paper._keys_exist(doc, 'abstract', '#text'):
             self.abstract = doc['abstract']['#text']
 
-        self.authors = get_authors(doc)
-        self.citations = get_citations(doc)
+        self.authors = Paper._get_authors(doc)
+        self.citations = Paper._get_citations(doc)
 
-        self.content = open(file_id + '.txt').read()
+    #    self.content = open(file_id + '.txt').read()
 
-    def _file_to_dict(self, fileName):
-        f = open(fileName, 'r')
+    @staticmethod
+    def _xml_file_to_dict(id):
+        t = tarfile.open(settings.XML_FILES_LOCATION, 'r')
+        f = t.extractfile(Paper._file_id_to_location(id) + '.xml')
         return xmltodict.parse(f.read())
 
-    def _file_id_to_location(self, id):
-        return settings.DATA_LOCATION + '/' + id.replace('.', '/') + '/'
+    @staticmethod
+    def _file_id_to_location(id):
+        return id.replace('.', '/') + '/' + id
 
-    def _get_authors(self, doc):
+    @staticmethod
+    def _get_authors(doc):
         authors = list()
-        if keys_exist(doc, 'authors', 'author'):
+        if Paper._keys_exist(doc, 'authors', 'author'):
             auts = doc['authors']['author']
-            auts = self._to_list_if_not(auts)
+            auts = Paper._to_list_if_not(auts)
             for i in auts:
-                a = Author()
-                a.id = i['@id']
-                a.name = i['name']['#text']
-                a.order = i['order']
+                a = Author(i['@id'], i['name']['#text'], i['order'])
                 authors.append(a)
         return authors
 
-    def _get_citations(self, doc):
+    @staticmethod
+    def _get_citations(doc):
         citations = list()
-        if keys_exist(doc, 'citations', 'citation'):
+        if Paper._keys_exist(doc, 'citations', 'citation'):
             cits = doc['citations']['citation']
-            cits = self._to_list_if_not(cits)
+            cits = Paper._to_list_if_not(cits)
             for i in cits:
-                ct = Citation()
-                ct.paperid = i['@id']
-                ct.raw = i['raw']
-                ctx = get_context_of_citation(i)
+                ct = Citation(i['@id'], i['raw'],)
+                ctx = Paper._get_context_of_citation(i)
                 if ctx != []:
                     ct.context = ctx
                 citations.append(ct)
         return citations
 
-    def _get_context_of_citation(self, citation):
+    @staticmethod
+    def _get_context_of_citation(citation):
         contexts = list()
-        if keys_exist(citation, 'contexts', 'context'):
+        if Paper._keys_exist(citation, 'contexts', 'context'):
             ctx = citation['contexts']['context']
-            contexts = self._to_list_if_not(ctx)
+            contexts = Paper._to_list_if_not(ctx)
         return contexts
 
-    def _keys_exist(self, doc, key1, key2):
+    @staticmethod
+    def _keys_exist(doc, key1, key2):
         if key1 in doc.keys():
             if type(doc[key1]) == dict or type(doc[key1]) == OrderedDict:
                 if key2 in doc[key1].keys():
                     return True
         return False
 
-    def _to_list_if_not(self, doc):
+    @staticmethod
+    def _to_list_if_not(doc):
         if type(doc) != list:
             doc = [doc]
         return doc
