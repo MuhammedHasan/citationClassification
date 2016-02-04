@@ -28,10 +28,12 @@ class TestPaper(unittest.TestCase):
     def setUp(self):
         settings.TEXT_FILES_LOCATION = 'test/test_text.tar.gz'
         settings.XML_FILES_LOCATION = 'test/test_xml.tar.gz'
-        self.paper = Paper('10.1.1.582.1')
+        self.id = '10.1.1.582.1'
+        self.paper = Paper(self.id)
 
     def test_init(self):
         self.assertIsNotNone(self.paper.id)
+        self.assertEqual(self.id,self.paper.id)
 
 if __name__ == '__main__':
     unittest.main()
