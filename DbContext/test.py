@@ -33,7 +33,7 @@ class TestPaper(unittest.TestCase):
 
     def test_init(self):
         self.assertIsNotNone(self.paper.id)
-        self.assertEqual(self.id,self.paper.id)
+        self.assertEqual(self.id, self.paper.id)
 
 if __name__ == '__main__':
     unittest.main()

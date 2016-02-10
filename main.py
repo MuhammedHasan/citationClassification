@@ -1,7 +1,7 @@
 from DbContext import Paper
 from DbContext import settings
 import tarfile
-#
+from tarfile import TarInfo
 # p = Paper('10.1.1.1.1519')
 #
 # print 'number of citation =>', len(p.citations)
@@ -12,6 +12,8 @@ import tarfile
 #     print i.context
 #     print '-' * 8, '\n'
 
-t = tarfile.open(settings.XML_FILES_LOCATION, "r:gz")
-print t.getmember(Paper._file_id_to_location('10.1.1.1.1519') + '.xml')
-# print t.gettarinfo(Paper._file_id_to_location('10.1.1.1.1519') + '.xml')
+tr = tarfile.open(settings.TEXT_FILES_LOCATION, 'r|gz')
+filename = './10/1/1/582/9667/10.1.1.582.9667.txt'
+for t in tr:
+    if filename in t.name:
+        tr.extractfile(t).read()
